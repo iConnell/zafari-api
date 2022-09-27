@@ -1,2 +1,3 @@
 /zvenv
 *.db
+__pycache__/
