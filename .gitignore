@@ -1,3 +1,4 @@
 /zvenv
 *.db
 __pycache__/
+.env

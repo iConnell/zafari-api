@@ -1,8 +1,9 @@
+from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from . import schemas, models
 from .database import get_db
-from .utils import hash_password
+from .utils import hash_password, create_access_token
 
 
 router = APIRouter(
@@ -22,6 +23,8 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return {"email": new_user.email}
+
+    expires_in = timedelta(minutes=30)
+    return {"token":create_access_token({"email": new_user.email, "id":new_user.id}, expires_in)}
 
 
