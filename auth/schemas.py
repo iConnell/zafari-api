@@ -12,10 +12,10 @@ class UserCreate(UserBase):
 
 class ReadUser(UserBase):
     id: int
-    username: str
+    username: str | None = None
     email: str
-    first_name: str
-    last_name: str
+    first_name: str | None = None
+    last_name: str | None = None
     is_active: bool
     
     class Config:

@@ -17,7 +17,6 @@ pwd_context = CryptContext(schemes=['bcrypt'], deprecated="auto")
 
 
 def get_user(id:int, db: Session):
-    
     user = db.query(User).filter(User.id==id).first()
     return user
 
@@ -33,11 +32,20 @@ def create_access_token(data: dict, expires_in: timedelta | None = None):
     if expires_in:
         expire = datetime.utcnow() + expires_in
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.utcnow() + timedelta(days=15)
 
     data_to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(data_to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt    
+
+def verify_access_token(token):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        
+        return payload
+        
+    except:
+        raise Exception
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
@@ -55,7 +63,6 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         user = get_user(id, db)
         return user
         
-    except Exception as e:
-        print(e)
+    except:
         raise credentials_exception
 

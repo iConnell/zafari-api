@@ -1,9 +1,9 @@
 from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from . import schemas, models
-from .database import get_db
-from .utils import hash_password, verify_password, create_access_token
+from .. import schemas, models
+from ..database import get_db
+from ..utils import verify_access_token, hash_password, verify_password, create_access_token
 
 
 router = APIRouter(
@@ -37,3 +37,17 @@ def user_login(credentials: schemas.UserCreate, db: Session=Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid credentials provied")
 
     return {"token":create_access_token({"email": user.email, "id":user.id})}
+
+
+@router.post('/verify-email/{token}', status_code=status.HTTP_200_OK)
+def verify_email(token, db: Session = Depends(get_db)):
+    payload = verify_access_token(token)
+
+    new_user = db.query(models.User).filter(models.User.email==payload['email'])
+
+    if not new_user.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    
+    new_user.update({"is_active":True})
+    db.commit()
+    return {}
