@@ -58,9 +58,7 @@ def verify_email(token, db: Session = Depends(get_db)):
 
 
 @router.post('/password/reset', status_code=status.HTTP_200_OK)
-def reset_password(request: schemas.UserBase, db:Session = Depends(get_db)):
-    email = request.email
-    
+def reset_password(request: schemas.UserBase, db:Session = Depends(get_db)):    
     user = db.query(models.User).filter(models.User.email==request.email).first()
     
     try:
@@ -71,3 +69,18 @@ def reset_password(request: schemas.UserBase, db:Session = Depends(get_db)):
         pass
 
     return {"data": "Email will be sent, if specified email is valid"}
+
+
+@router.post('/password/change', status_code=status.HTTP_200_OK)
+def change_password(passwords:schemas.ChangePasswordSchema, user: schemas.ReadUser = Depends(get_current_user), db:Session=Depends(get_db)):
+    if passwords.password1 != passwords.password2:
+        raise HTTPException(status_code=400, detail="passwords do not match")
+
+    hashed_password = hash_password(passwords.password1)
+    
+    db.query(models.User).filter(models.User.id==user.id).update({"password": hashed_password})
+    db.commit()
+
+    return {}
+
+    

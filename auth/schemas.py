@@ -1,5 +1,9 @@
 from pydantic import BaseModel
 
+class ChangePasswordSchema(BaseModel):
+    password1:str
+    password2:str
+
 class Token(BaseModel):
     access_token: str
     token_type: str
