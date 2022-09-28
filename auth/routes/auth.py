@@ -22,7 +22,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
     token = create_access_token({"email": new_user.email})
 
-    sendEmail(new_user.email, token)
+    #sendEmail(new_user.email, token)
 
     db.add(new_user)
     db.commit()
