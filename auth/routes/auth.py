@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from .. import schemas, models
 from ..database import get_db
-from ..utils import verify_access_token, hash_password, verify_password, create_access_token, sendEmail
+from ..utils import get_current_user, verify_access_token, hash_password, verify_password, create_access_token, sendEmail
 
 
 router = APIRouter(
@@ -55,3 +55,19 @@ def verify_email(token, db: Session = Depends(get_db)):
     new_user.update({"is_active":True})
     db.commit()
     return {}
+
+
+@router.post('/password/reset', status_code=status.HTTP_200_OK)
+def reset_password(request: schemas.UserBase, db:Session = Depends(get_db)):
+    email = request.email
+    
+    user = db.query(models.User).filter(models.User.email==request.email).first()
+    
+    try:
+        token = create_access_token({"email": user.email, "id":user.id}, timedelta(hours=1))
+        sendEmail(user.email, token)
+
+    except:
+        pass
+
+    return {"data": "Email will be sent, if specified email is valid"}
