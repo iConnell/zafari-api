@@ -6,6 +6,7 @@ import jwt
 from .models import User
 from .database import get_db
 from sqlalchemy.orm import Session
+import smtplib
 
 # for development purposes only
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
@@ -66,3 +67,9 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     except:
         raise credentials_exception
 
+
+# will be updated
+def sendEmail(user_email, message):
+    smtp = smtplib.SMTP("smtp.elasticemail.com", 2525)
+    smtp.login("user", "secret")
+    smtp.sendmail("from", [user_email], message)

@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from .. import schemas, models
 from ..database import get_db
-from ..utils import verify_access_token, hash_password, verify_password, create_access_token
+from ..utils import verify_access_token, hash_password, verify_password, create_access_token, sendEmail
 
 
 router = APIRouter(
@@ -19,6 +19,10 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     
     hashed_password = hash_password(user.password)
     new_user = models.User(email=user.email, password=hashed_password)
+
+    token = create_access_token({"email": new_user.email})
+
+    sendEmail(new_user.email, token)
 
     db.add(new_user)
     db.commit()
